@@ -46,7 +46,7 @@ def index():
     #session['uid'] = str(uuid.uuid1())
 
     logger.info(f"session set {session['uid']}")
-    return render_template( 'index.html', invalid_feedback="", stack_list = [], stack_dict_list = [])
+    return render_template('index.html', invalid_feedback="", stack_list = [], stack_dict_list = [])
 
 def allowed_file(filename):
     return '.' in filename and \
