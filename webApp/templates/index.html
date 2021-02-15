@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title>Cell Count with OpenCV</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+        <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap-theme.min.css">
+        <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css">
+        <script src="https://netdna.bootstrapcdn.com/bootstrap/3.0.3/js/bootstrap.min.js"></script>
+        <style>
+
+
+
+        h3, .h3 {
+            font-size: x-large;
+            font-family: monospace;
+            color: blue;
+            font-weight: bold;
+        }
+
+        .jumbotron-title {
+          padding: 1rem 1rem;
+          margin-bottom: 1rem;
+          background-color: #e9ecef;
+          border-radius: 0.3rem;
+        }
+
+        label {
+            display: inline-block;
+            margin-bottom: 0px;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        .buttonclass {
+            margin-bottom: 0px;
+            margin-top: 10px;
+        }
+
+        span {
+            margin-bottom: 10px;
+        }
+
+        .slidecontainer .dropdownlist{
+            width: 90%;
+            margin-bottom: 0px;
+        }
+
+        .slider {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 5px;
+            border-radius: 5px;
+            background: #d3d3d3;
+            outline: none;
+            opacity: 1;
+            -webkit-transition: .2s;
+            transition: opacity .2s;
+        }
+
+        .slider:hover {
+            opacity: 1;
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: steelblue;
+            cursor: pointer;
+        }
+
+        .slider::-moz-range-thumb {
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            background: #4CAF50;
+            cursor: pointer;
+        }
+
+        .invalid-feedback{
+            width: 100%;
+            margin-top: .25rem;
+            color: #dc3545;
+        }
+
+        select {
+            width: 100%;
+        }
+
+        input[type="radio"] {
+            margin: 10px 10px
+        }
+
+        /*
+         * Footer
+         */
+        .footer {
+          padding: 2.5rem 0;
+          color: #999;
+          text-align: center;
+          background-color: #f9f9f9;
+          border-top: .05rem solid #e5e5e5;
+        }
+
+        </style>
+    </head>
+    <body>
+  <section class="jumbotron-title text-center">
+    <div class="container">
+      <h1>Cell Count with OpenCV</h1>
+      <p class="lead text-muted">Upload .lif images and perform simple image processing with Python OpenCV library to count the number of cells</p>
+    </div>
+  </section>
+  <div class="container">
+
+      <div class="row">
+        <div class="col-md-4">
+
+            <form method=post enctype=multipart/form-data>
+                <div class="dropdownlist">
+                    <label for="filepath">Upload a .lif image file:</label>
+                    <input type="file" id="imagefile" name="imagefile" type=submit value=Upload>
+                </div>
+
+                <div class="buttonclass">
+                    <button class="btn btn-primary btn-lg btn-block" id="upload">Upload and Preview</button>
+                </div>
+                <div class="invalid-feedback">{{ invalid_feedback|safe }}</div>
+                <div class="invalid-feedback" id="invalid-ajax"></div>
+            </form>
+
+            <div class="dropdownlist">
+                <label for="stack">Choose a Stack:</label><span><select id="stack" class="dropdown"></select></span>
+            </div>
+
+            <div class="dropdownlist">
+                <label for="zframe">Choose a Slide:</label><span><select id="zframe" class="dropdown"></select></span>
+            </div>
+
+            <div class="dropdownlist">
+                <label for="channel">Choose a Channel:</label><span><select id="channel" class="dropdown"></select></span>
+            </div>
+
+            <div class="slidecontainer">
+                <label>Background Threshold: <span id="bg_thresh"></span></label>
+                <input type="range" min="0" max="100" value="10" class="slider" id="bg_thresh_range" step="1">
+            </div>
+
+            <div class="slidecontainer">
+                <label>Adaptive Threshold: <span id="adaptive_thresh"></span></label>
+                <input type="range" min="11" max="251" value="171" class="slider" id="adaptive_thresh_range" step="10">
+            </div>
+
+            <div class="slidecontainer">
+                <label>Erosion iteration: <span id="erosion"></span></label>
+                <input type="range" min="1" max="10" value="3" class="slider" id="erosion_range" step="1">
+            </div>
+
+            <div class="slidecontainer">
+                <label>Dilation iteration: <span id="dilation"></span></label>
+                <input type="range" min="1" max="10" value="3" class="slider" id="dilation_range" step="1">
+            </div>
+
+            <div class="slidecontainer">
+                <label>Minimum distance: <span id="min_dist"></span></label>
+                <input type="range" min="10" max="1000" value="300" class="slider" id="min_dist_range" step="10">
+            </div>
+
+            <div class="slidecontainer">
+                <label>Gamma: <span id="gamma"></span></label>
+                <input type="range" min="0.1" max="1" value="0.7" class="slider" id="gamma_range" step="0.1">
+            </div>
+
+            <div class="slidecontainer">
+                <label>Gain: <span id="gain"></span></label>
+                <input type="range" min="0.1" max="1" value="1" class="slider" id="gain_range" step="0.1">
+            </div>
+            <div>
+                <h4>Apply to:</h4>
+            </div>
+
+            <form action="/download" method="get">
+                <div>
+                    <label class="radio-class" for="export_image">Current Image</label>
+                    <input value="image" name="export_option" type="radio" class="radio-class" checked>
+                    <br>
+                    <label class="radio-class" for="export_stack">Current Stack</label>
+                    <input value="stack" name="export_option" type="radio" class="radio-class">
+                    <br>
+                    <label class="radio-class" for="export_all">All Stacks</label>
+                    <input value="all" name="export_option" type="radio" class="radio-class">
+                </div>
+
+                <div class="buttonclass">
+                    <button class="btn btn-primary btn-lg btn-block download-button" id="download">Export and Download</button>
+                </div>
+            </form>
+
+          <div >
+
+          </div>
+          <div>
+
+          </div>
+          <div>
+
+          </div>
+
+
+
+        </div>
+        <div class="col-md-8">
+            <p style="text-align:center">
+                <img id="current_image" src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" style='padding:1px; width: 100%; height: 100%'>
+            </p>
+
+            <div class="row">
+
+            </div>
+        </div>
+      </div>
+      <div style="margin-bottom: 3rem"></div>
+    </div>
+
+    <footer class="footer">
+      <p>&copy; 2021 Annie Yim</p>
+
+    </footer>
+    </body>
+
+    <script>
+
+        var stack_list = {{ stack_list|safe }}
+        for (let stack in stack_list) {
+            $('#stack').append('<option value=' + stack + '>' + stack + '</option>');
+            }
+
+        var stack_dict_list = {{ stack_dict_list|safe }}
+        if (stack_dict_list.length > 0){
+            var z_list = stack_dict_list[$('#stack option:selected').text()]['Z_LIST']
+            for (let zframe in z_list) {
+                $('#zframe').append('<option value=' + zframe + '>' + zframe + '</option>');
+                }
+
+            var c_list = stack_dict_list[$('#stack option:selected').text()]['C_LIST']
+            for (let channel in c_list) {
+                $('#channel').append('<option value=' + channel + '>' + channel + '</option>');
+                }
+            if (c_list.length > 1){
+                document.getElementById("channel").selectedIndex = 1;
+            }
+        }
+
+        $("#stack").on("change",function(i){
+            if (stack_dict_list.length > 0) {
+                $("#zframe").empty()
+                var z_list = stack_dict_list[$('#stack option:selected').text()]['Z_LIST']
+                for (let zframe in z_list) {
+                    $('#zframe').append('<option value=' + zframe + '>' + zframe + '</option>');
+                }
+                $("#channel").empty()
+                var c_list = stack_dict_list[$('#stack option:selected').text()]['C_LIST']
+                for (let channel in c_list) {
+                    $('#channel').append('<option value=' + channel + '>' + channel + '</option>');
+                }
+                if (c_list.length > 1){
+                document.getElementById("channel").selectedIndex = 1;
+                }
+            }
+        })
+
+        if (stack_list.length == 0){
+            $(".slider").addClass("disabled").prop("disabled", true);
+            $(".radio-class").addClass("disabled").prop("disabled", true);
+            $(".dropdown").addClass("disabled").prop("disabled", true);
+            $(".download-button").addClass("disabled").prop("disabled", true);
+        }
+
+        var bg_thresh_slider = $("#bg_thresh_range");
+        $("#bg_thresh").html(bg_thresh_slider.val());
+        bg_thresh_slider.change(function() {
+            $("#bg_thresh").html(bg_thresh_slider.val())})
+
+        var adaptive_thresh_slider = $("#adaptive_thresh_range");
+        $("#adaptive_thresh").html(adaptive_thresh_slider.val());
+        adaptive_thresh_slider.change(function() {
+            $("#adaptive_thresh").html(adaptive_thresh_slider.val())})
+
+        var erosion_slider = $("#erosion_range");
+        $("#erosion").html(erosion_slider.val());
+        erosion_slider.change(function() {
+            $("#erosion").html(erosion_slider.val())})
+
+        var dilation_slider = $("#dilation_range");
+        $("#dilation").html(dilation_slider.val());
+        dilation_slider.change(function() {
+            $("#dilation").html(dilation_slider.val())})
+
+        var min_dist_slider = $("#min_dist_range");
+        $("#min_dist").html(min_dist_slider.val());
+        min_dist_slider.change(function() {
+            $("#min_dist").html(min_dist_slider.val())})
+
+        var gamma_slider = $("#gamma_range");
+        $("#gamma").html(gamma_slider.val());
+        gamma_slider.change(function() {
+            $("#gamma").html(gamma_slider.val())})
+
+        var gain_slider = $("#gain_range");
+        $("#gain").html(gain_slider.val());
+        gain_slider.change(function() {
+            $("#gain").html(gain_slider.val())})
+
+        var logger = '';
+
+        function fetchimage()
+        {
+        // dictionary that stores user inputs
+            $.ajax({
+                method: "GET",
+                url: '{{ url_for('update_image')}}',
+                data: {
+                    'stack': $('#stack option:selected').html(),
+                    'zframe': $('#zframe option:selected').html(),
+                    'channel': $("#channel option:selected").html(),
+                    'bg_thresh': $("#bg_thresh").html(),
+                    'adaptive_thresh': $("#adaptive_thresh").html(),
+                    'erosion': $("#erosion").html(),
+                    'dilation': $("#dilation").html(),
+                    'min_dist': $("#min_dist").html(),
+                    'gamma': $("#gamma").html(),
+                    'gain': $("#gain").html(),
+                },
+                success: function(data){
+                    $("#current_image").attr('src', 'data:image/jpg;base64,' + data);
+                },
+                error: function(){
+                    $("#invalid-ajax").html("Image processing failed")
+                }
+            });
+        }
+
+        // add event listener to capture changes
+        //$(document).mouseup(function () {fetchimage()});
+        if (stack_list.length > 0){fetchimage();}
+        $(document).on('change', function () {
+            if (stack_list.length > 0){fetchimage();}
+        });
+
+
+    </script>
+    </html>
