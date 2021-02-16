@@ -1,6 +1,7 @@
 # Cell Count OpenCV
 A simple webapp that performs image processing on .lif images with Python OpenCV library to count the number of cells
 
+**Demo: https://cell-count-opencv.herokuapp.com/** 
 ## Flask App Deployment 
 
 1) Please make sure you have conda installed - [Install Conda](https://docs.anaconda.com/anaconda/install/)
