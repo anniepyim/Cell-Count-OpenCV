@@ -21,26 +21,26 @@ UPLOAD_FOLDER = "./user_files/upload"
 EXPORT_FOLDER = "./user_files/export"
 
 # EB looks for an 'application' callable by default.
-application = Flask(__name__)
-application.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-application.config['EXPORT_FOLDER'] = EXPORT_FOLDER
-application.config['SESSION_PERMANENT'] = False
-application.secret_key = "change_your_secret!"
-socketio = SocketIO(application)
+app = Flask(__name__)
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.config['EXPORT_FOLDER'] = EXPORT_FOLDER
+app.config['SESSION_PERMANENT'] = False
+app.secret_key = "change_your_secret!"
+socketio = SocketIO(app)
 
 CONNECTIVITY = 10
 CIRCLE_RADIUS = 4
+CENTERS_NO = 0
 
-@application.errorhandler(500)
+@app.errorhandler(500)
 def server_error(e):
     logging.exception('some eror')
     return """
     And internal error <pre>{}</pre>
     """.format(e), 500
 
-@application.route("/")
+@app.route("/")
 def index():
-
     #only single user is allowed
     session['uid'] = "test_user"
     #session['uid'] = str(uuid.uuid1())
@@ -52,15 +52,15 @@ def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-@application.route('/', methods=['POST'])
+@app.route('/', methods=['POST'])
 def upload_file():
 
     uploaded_file = request.files['imagefile']
     if uploaded_file and allowed_file(uploaded_file.filename):
         original_name = uploaded_file.filename
         file_name = session['uid'] + "." + original_name.rsplit('.', 1)[1].lower()
-        session['file_path'] = os.path.join(application.config['UPLOAD_FOLDER'], file_name)
-        session['export_dir'] = os.path.join(application.config['EXPORT_FOLDER'], session['uid'])
+        session['file_path'] = os.path.join(app.config['UPLOAD_FOLDER'], file_name)
+        session['export_dir'] = os.path.join(app.config['EXPORT_FOLDER'], session['uid'])
 
         if os.path.exists(session['export_dir']):
             shutil.rmtree(session['export_dir'])
@@ -93,8 +93,10 @@ def upload_file():
         return render_template('index.html', invalid_feedback="Invalid file - Please check if file exists and is in correct format", stack_list = [], stack_dict_list = [])
 
 # accepts either deafult values or user inputs and outputs prediction
-@application.route('/update_image', methods=['POST', 'GET'])
+@app.route('/update_image', methods=['POST', 'GET'])
 def update_image():
+
+    global CENTERS_NO
 
     try:
         session['stack'] = int(request.args.get('stack'))
@@ -112,7 +114,7 @@ def update_image():
 
         lif_file = LifFile(session['file_path'])
         img_list = [i for i in lif_file.get_iter_image()]
-        img, centers_no = generate_image(img_list, session['stack'], session['zframe'], session['channel'],
+        img, CENTERS_NO = generate_image(img_list, session['stack'], session['zframe'], session['channel'],
                                          session['bg_thresh'], session['adaptive_thresh'],
                                          session['erosion'], session['dilation'],
                                          session['min_dist'], session['gamma'], session['gain'],
@@ -130,7 +132,14 @@ def update_image():
         resp = {'message': 'Failed'}
         return make_response(jsonify(resp), 400)
 
-@application.route('/download', methods=['GET'])
+@app.route('/get_centers_no', methods=['POST', 'GET'])
+def get_centers_no():
+
+    global CENTERS_NO
+
+    return jsonify({'centers_no':CENTERS_NO})
+
+@app.route('/download', methods=['GET'])
 def download_file():
 
     export_option = request.args.get('export_option')
@@ -199,7 +208,7 @@ def disconnect_user():
     if os.path.exists(session['file_path']):
         os.remove(session['file_path'])
 
-# when running app locally
-if __name__ == '__main__':
-    application.debug = False
-    application.run(host='0.0.0.0')
+# # # when running app locally
+# # if __name__ == '__main__':
+# #     application.debug = False
+#     application.run(host='0.0.0.0')

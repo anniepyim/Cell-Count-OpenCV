@@ -14,5 +14,6 @@ Pillow==8.1.0
 scikit-image==0.18.1
 readlif==0.4.1
 tifffile==2021.2.1
-opencv-python==4.5.1.48
+opencv-python-headless==4.2.0.32
 flask_socketio==5.0.1
+gunicorn==20.0.4

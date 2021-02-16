@@ -216,6 +216,7 @@
 
         </div>
         <div class="col-md-8">
+            <label>Number of spots: <span id="centers_no"></span></label>
             <p style="text-align:center">
                 <img id="current_image" src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" style='padding:1px; width: 100%; height: 100%'>
             </p>
@@ -339,9 +340,22 @@
                 },
                 success: function(data){
                     $("#current_image").attr('src', 'data:image/jpg;base64,' + data);
+                    fetchcenterno();
                 },
                 error: function(){
                     $("#invalid-ajax").html("Image processing failed")
+                }
+            });
+        }
+
+        function fetchcenterno()
+        {
+        // dictionary that stores user inputs
+            $.ajax({
+                method: "GET",
+                url: '{{ url_for('get_centers_no')}}',
+                success: function(data){
+                    $('#centers_no').html(data.centers_no);
                 }
             });
         }
