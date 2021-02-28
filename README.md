@@ -4,6 +4,7 @@ A simple webapp that performs image processing on .lif images with Python OpenCV
 **Demo: https://cell-count-opencv.herokuapp.com/** 
 ## Flask App Deployment 
 
+### Installation
 1) Please make sure you have conda installed - [Install Conda](https://docs.anaconda.com/anaconda/install/)
 
 2) Execute the following command at your terminal:
@@ -13,6 +14,15 @@ cd ./Cell-Count-OpenCV # the directory to this project
 conda create -n cell-count-opencv python=3.7 
 conda activate cell-count-opencv
 pip install -r requirements.txt
+gunicorn wsgi:app
+```
+
+### Running Cell-Count-OpenCV
+
+Execute the following command at your terminal:
+```sh
+cd ./Cell-Count-OpenCV # the directory to this project
+conda activate cell-count-opencv
 gunicorn wsgi:app
 ```
 
