@@ -27,3 +27,10 @@ gunicorn wsgi:app
 ```
 
 Then the webapp should be running at `http://127.0.0.1:8000` which could be accessible via any browser.
+
+### Stopping Cell-Count-OpenCV
+Execute the following command at your terminal:
+```sh
+cd ./Cell-Count-OpenCV # the directory to this project
+sh stop.sh 
+```
