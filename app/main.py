@@ -62,13 +62,10 @@ def upload_file():
         session['file_path'] = os.path.join(app.config['UPLOAD_FOLDER'], file_name)
         session['export_dir'] = os.path.join(app.config['EXPORT_FOLDER'], session['uid'])
 
-        if os.path.exists(session['export_dir']):
-            shutil.rmtree(session['export_dir'])
         if os.path.exists(session['file_path']):
             os.remove(session['file_path'])
 
         uploaded_file.save(session['file_path'])
-        os.makedirs(session['export_dir'])
 
         try:
             lif_file = LifFile(session['file_path'])
@@ -144,6 +141,10 @@ def download_file():
 
     export_option = request.args.get('export_option')
 
+    if os.path.exists(session['export_dir']):
+        shutil.rmtree(session['export_dir'])
+    os.makedirs(session['export_dir'])
+
     lif_file = LifFile(session['file_path'])
     img_list = [i for i in lif_file.get_iter_image()]
     data = download_image(export_option, session['export_dir'], img_list,
@@ -152,6 +153,7 @@ def download_file():
                           session['bg_thresh'], session['adaptive_thresh'],
                           session['erosion'], session['dilation'],
                           session['min_dist'], session['gamma'], session['gain'], CONNECTIVITY, CIRCLE_RADIUS)
+
 
     data_df = pd.DataFrame(data)
     export_file_path = os.path.join(session['export_dir'], "data.csv")
