@@ -69,19 +69,26 @@ def upload_file():
 
         try:
             lif_file = LifFile(session['file_path'])
-            img_list = [i for i in lif_file.get_iter_image()]
+            img_list = lif_file.image_list
 
-            session['stack_list'] = [i for i in range(len(img_list))]
-            session['stack_dict_list'] = []
+            stack_dict_list = []
+            stack_list = []
+
             for img in img_list:
-                z_list = [i for i in range(len(list(img.get_iter_z(t=0, c=0))))]
-                c_list = [i for i in range(len(list(img.get_iter_c(t=0, z=0))))]
-                session['stack_dict_list'].append({"Z_LIST": z_list, 'C_LIST': c_list})
+                img_name = ''.join(e for e in img['name'] if (e.isalnum() or e == ' '))
+                stack_list.append(img_name)
+                c_list = [i for i in range(img['channels'])]
+                z_list = [i for i in range(img['dims'].z)]
+                stack_dict_list.append({'Z_LIST': z_list, 'C_LIST': c_list})
+
+            session['stack_list'] = stack_list
+            session['stack_dict_list'] = stack_dict_list
 
             # session['stack_list'] = [1,2]
             # session['stack_dict_list'] = [{'Z_LIST':[1,2,3,4], 'C_LIST':[1,2,3,4]}, {'Z_LIST':[1,2], 'C_LIST':[1,2]}]
 
-            return render_template('index.html', stack_list = session['stack_list'], stack_dict_list = session['stack_dict_list'])
+            return render_template('index.html', stack_list=session['stack_list'],
+                                   stack_dict_list=session['stack_dict_list'])
 
         except Exception as e:
             logger.error(e)

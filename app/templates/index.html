@@ -238,18 +238,19 @@
     <script>
 
         var stack_list = {{ stack_list|safe }}
-        for (let stack in stack_list) {
-            $('#stack').append('<option value=' + stack + '>' + stack + '</option>');
+
+        for (let i in stack_list) {
+            $('#stack').append('<option value=' + i + '>' + stack_list[i] + '</option>');
             }
 
         var stack_dict_list = {{ stack_dict_list|safe }}
         if (stack_dict_list.length > 0){
-            var z_list = stack_dict_list[$('#stack option:selected').text()]['Z_LIST']
+            var z_list = stack_dict_list[Number($('#stack option:selected').val())]['Z_LIST']
             for (let zframe in z_list) {
                 $('#zframe').append('<option value=' + zframe + '>' + zframe + '</option>');
                 }
 
-            var c_list = stack_dict_list[$('#stack option:selected').text()]['C_LIST']
+            var c_list = stack_dict_list[Number($('#stack option:selected').val())]['C_LIST']
             for (let channel in c_list) {
                 $('#channel').append('<option value=' + channel + '>' + channel + '</option>');
                 }
@@ -261,12 +262,12 @@
         $("#stack").on("change",function(i){
             if (stack_dict_list.length > 0) {
                 $("#zframe").empty()
-                var z_list = stack_dict_list[$('#stack option:selected').text()]['Z_LIST']
+                var z_list = stack_dict_list[Number($('#stack option:selected').val())]['Z_LIST']
                 for (let zframe in z_list) {
                     $('#zframe').append('<option value=' + zframe + '>' + zframe + '</option>');
                 }
                 $("#channel").empty()
-                var c_list = stack_dict_list[$('#stack option:selected').text()]['C_LIST']
+                var c_list = stack_dict_list[Number($('#stack option:selected').val())]['C_LIST']
                 for (let channel in c_list) {
                     $('#channel').append('<option value=' + channel + '>' + channel + '</option>');
                 }
@@ -327,7 +328,7 @@
                 method: "GET",
                 url: '{{ url_for('update_image')}}',
                 data: {
-                    'stack': $('#stack option:selected').html(),
+                    'stack': Number($('#stack option:selected').val()),
                     'zframe': $('#zframe option:selected').html(),
                     'channel': $("#channel option:selected").html(),
                     'bg_thresh': $("#bg_thresh").html(),
