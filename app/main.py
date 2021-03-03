@@ -10,13 +10,14 @@ from readlif.reader import LifFile
 import cv2
 import zipfile
 import shutil
+import json
 
 import base64
 import logging
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO, format='%(asctime)s [%(levelname)s] %(name)s %(message)s')
 
-ALLOWED_EXTENSIONS = ['', 'txt', 'lif']
+ALLOWED_EXTENSIONS = ['lif']
 UPLOAD_FOLDER = "./user_files/upload"
 EXPORT_FOLDER = "./user_files/export"
 
@@ -163,8 +164,18 @@ def download_file():
 
 
     data_df = pd.DataFrame(data)
-    export_file_path = os.path.join(session['export_dir'], "data.csv")
-    data_df.to_csv(export_file_path, index=False, sep=";")
+    export_file_path_data = os.path.join(session['export_dir'], "data.csv")
+    data_df.to_csv(export_file_path_data, index=False, sep=";")
+
+    config = {'background_threshold': session['bg_thresh'],
+              'adaptive_threshold': session['adaptive_thresh'],
+              'erosion_iteration': session['erosion'],
+              'dilation_iteration': session['dilation'],
+              'minimum_distance': session['min_dist']}
+
+    export_file_path_config = os.path.join(session['export_dir'], "config.txt")
+    with open(export_file_path_config, 'w') as file:
+        file.write(json.dumps(config))
 
     def retrieve_file_paths(dirName):
 
