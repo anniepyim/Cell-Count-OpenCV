@@ -340,6 +340,7 @@
                 },
                 success: function(data){
                     $("#current_image").attr('src', 'data:image/jpg;base64,' + data);
+                    $("#invalid-ajax").html("")
                     fetchcenterno();
                 },
                 error: function(){
