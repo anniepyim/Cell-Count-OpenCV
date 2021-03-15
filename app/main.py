@@ -49,6 +49,37 @@ def index():
     logger.info(f"session set {session['uid']}")
     return render_template('index.html', invalid_feedback="", stack_list = [], stack_dict_list = [])
 
+@app.route("/local")
+def local():
+    session['file_path'] = os.path.join(app.config['UPLOAD_FOLDER'], "test_user.lif")
+
+    try:
+        lif_file = LifFile(session['file_path'])
+        img_list = lif_file.image_list
+
+        stack_dict_list = []
+        stack_list = []
+
+        for img in img_list:
+            img_name = ''.join(e for e in img['name'] if (e.isalnum() or e == ' '))
+            stack_list.append(img_name)
+            c_list = [i for i in range(img['channels'])]
+            z_list = [i for i in range(img['dims'].z)]
+            stack_dict_list.append({'Z_LIST': z_list, 'C_LIST': c_list})
+
+        session['stack_list'] = stack_list
+        session['stack_dict_list'] = stack_dict_list
+
+        # session['stack_list'] = [1,2]
+        # session['stack_dict_list'] = [{'Z_LIST':[1,2,3,4], 'C_LIST':[1,2,3,4]}, {'Z_LIST':[1,2], 'C_LIST':[1,2]}]
+
+        return render_template('index.html', stack_list=session['stack_list'],
+                               stack_dict_list=session['stack_dict_list'])
+
+    except Exception as e:
+        logger.error(e)
+        return render_template('index.html', invalid_feedback="Invalid file - Please check if the image file is valid", stack_list=[], stack_dict_list = [])
+
 def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
