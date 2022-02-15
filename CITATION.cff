@@ -4,6 +4,6 @@ authors:
 - family-names: "Yim"
   given-names: "Annie Po Yee"
 title: "Cell Count OpenCV"
-version: 0.0.1
+version: 0.1.0
 date-released: 2021-03-03
 url: "https://github.com/anniepyim/Cell-Count-OpenCV"
