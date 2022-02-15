@@ -1,0 +1,9 @@
+cff-version: 1.0.0
+message: "If you use this software, please cite it as below."
+authors:
+- family-names: "Yim"
+  given-names: "Annie Po Yee"
+title: "Cell Count OpenCV"
+version: 0.0.1
+date-released: 2021-03-03
+url: "https://github.com/anniepyim/Cell-Count-OpenCV"
